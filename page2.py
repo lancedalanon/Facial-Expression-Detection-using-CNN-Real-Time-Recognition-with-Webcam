@@ -75,7 +75,12 @@ class PlaceholderPage(tk.Frame):
         """ Prompt the user to upload an image and process it for facial expressions. """
         file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.jpg;*.jpeg;*.png")])
         if file_path:
-            self.process_image(file_path)
+            # Clear the canvas and reset any previous image-related variables
+            self.canvas.delete("all")  # Clear the canvas
+            self.processed_image = None  # Reset the processed image
+            self.image_on_canvas = None  # Reset the image on canvas
+            self.canvas_scale = 1.0  # Reset zoom scale
+            self.process_image(file_path)  # Process the new image
 
     def process_image(self, file_path):
         """ Process the uploaded image for facial expression detection and display results. """
