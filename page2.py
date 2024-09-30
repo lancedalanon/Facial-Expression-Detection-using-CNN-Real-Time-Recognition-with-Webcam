@@ -9,6 +9,7 @@ import os
 import sys
 import tempfile  # For creating temporary files
 
+
 class PlaceholderPage(tk.Frame):
     """ A Tkinter Frame for uploading images and displaying detected facial expressions. """
 
@@ -24,6 +25,7 @@ class PlaceholderPage(tk.Frame):
         # Add buttons for switching to real-time detection and uploading images
         tk.Button(button_frame, text="Switch to Real Time Detection", command=self.switch_to_first_page).pack(side=tk.LEFT, padx=5)
         tk.Button(button_frame, text="Upload Image", command=self.upload_image).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="Save Image", command=self.save_image).pack(side=tk.LEFT, padx=5)
 
         # Create a canvas for displaying the image
         self.canvas = tk.Canvas(self)
@@ -85,6 +87,10 @@ class PlaceholderPage(tk.Frame):
         gray_img = cv2.cvtColor(test_img, cv2.COLOR_BGR2GRAY)
         faces_detected = self.face_haar_cascade.detectMultiScale(gray_img, 1.32, 5)
 
+        if len(faces_detected) == 0:
+            messagebox.showinfo("No Faces", "No faces were detected in the image.")
+            return
+
         # Variable to store detected faces and their emotions
         rois = []
 
@@ -114,19 +120,18 @@ class PlaceholderPage(tk.Frame):
             # Store the face region and emotion text
             rois.append((x, y, w, h, emotion_text))
 
-        # Sort detected faces by area and display the largest one
-        if rois:
-            rois.sort(key=lambda roi: roi[2] * roi[3], reverse=True)
-            self.display_image_with_emotions(test_img, rois[0])  # Display only the largest face
+        # Display all detected faces with emotions
+        self.display_image_with_emotions(test_img, rois)
 
-    def display_image_with_emotions(self, test_img, largest_roi):
-        """ Display the processed image with detected emotion on the largest face. """
-        x, y, w, h, emotion_text = largest_roi
-
+    def display_image_with_emotions(self, test_img, rois):
+        """ Display the processed image with detected emotion on the faces. """
         # Convert OpenCV image to PIL for drawing text
         pil_img = Image.fromarray(cv2.cvtColor(test_img, cv2.COLOR_BGR2RGB))
         draw = ImageDraw.Draw(pil_img)
-        draw.text((x, y - 50), emotion_text, font=self.font, fill=(255, 0, 0, 255))
+
+        for roi in rois:
+            x, y, w, h, emotion_text = roi
+            draw.text((x, y - 50), emotion_text, font=self.font, fill=(255, 0, 0, 255))
 
         # Save the processed image with the emotion text
         self.processed_image = pil_img
@@ -149,6 +154,16 @@ class PlaceholderPage(tk.Frame):
 
         # Add the new image to the canvas
         self.canvas.create_image(self.canvas.winfo_width() // 2, self.canvas.winfo_height() // 2, anchor=tk.CENTER, image=self.image_on_canvas)
+
+    def save_image(self):
+        """ Save the processed image with emotions to a file. """
+        if self.processed_image:
+            save_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png")])
+            if save_path:
+                self.processed_image.save(save_path)
+                messagebox.showinfo("Image Saved", "Processed image saved successfully!")
+        else:
+            messagebox.showwarning("No Image", "No processed image to save.")
 
     def zoom(self, event):
         """ Zoom in and out of the processed image on mouse scroll. """
