@@ -5,7 +5,7 @@ a = Analysis(
     ['app.py'],
     pathex=[],
     binaries=[],
-    datas=[('Facial Expression Recognition.json', '.'), ('fer.h5', '.'), ('haarcascade_frontalface_default.xml', '.')],
+    datas=[('Facial Expression Recognition.json', '.'), ('fer.h5', '.'), ('haarcascade_frontalface_default.xml', '.'), ('DejaVuSans.ttf', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
